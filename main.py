@@ -1,7 +1,7 @@
 # Reuses some info from Stephen Bailey shared on [desi-data 3401] "running fiber assignment on a real target catalog"
 import os
 import subprocess
-from astropy.table import Table, join
+from astropy.table import Table, join, vstack
 import numpy as np
 from desitarget.targetmask import desi_mask, bgs_mask, mws_mask, obsmask, obsconditions
 import fitsio
@@ -9,6 +9,8 @@ import glob
 from desisim.quickcat import quickcat
 import desimodel.io
 import argparse
+import desitarget.mtl
+
 
 parser = argparse.ArgumentParser(description='Define parameters')
 parser.add_argument('--program', type=str, required=True,
@@ -38,10 +40,11 @@ names = {"targets": "dr7.1-PR372.fits", "skies":"dr7.1-0.22.0.fits", "gfas": "dr
 
 mtlfile = os.path.join(datadir, 'mtl_{}.fits'.format(size, program))
 starfile = os.path.join(datadir, 'std_{}.fits'.format(size, program))
+goodskyfile = os.path.join(datadir, 'sky_{}.fits'.format(size, program))
+tilefile = os.path.join(datadir, "input_tiles.fits")
 targetfile = os.path.join(paths["targets"], "targets-{}".format(names["targets"]))
 skyfile = os.path.join(paths["skies"], "skies-{}".format(names["skies"]))
 gfafile = os.path.join(paths["gfas"], "gfas-{}".format(names["gfas"]))
-tilefile = os.path.join(datadir, "input_tiles.fits")
 
 
 # tile selection
@@ -67,6 +70,21 @@ if not os.path.exists(tilefile):
 
     print("wrote tiles to {}".format(tilefile))
 
+# good sky
+if (not os.path.exists(goodskyfile)):
+    print('Started reading {}'.format(skyfile))
+    skydata = fitsio.read(skyfile, 'SKIES')
+    if size=="small":
+        ii = (skydata['RA']>10) &  (skydata['RA']<40) & (skydata['DEC']<15) & (skydata['DEC']>-15)
+        skydata = skydata[ii]
+        
+    ii_goodsky = (skydata['DESI_TARGET']==desi_mask.SKY)!=0
+    ii_badsky = (skydata['DESI_TARGET']==desi_mask.BAD_SKY)!=0
+    goodskydata = skydata[ii_goodsky]
+    badskydata = skydata[ii_badsky]
+    fitsio.write(goodskyfile, goodskydata, extname='SKY')
+    print('Finished writing {}'.format(goodskyfile))
+
 # target selection
 if (not os.path.exists(mtlfile)) or (not os.path.exists(starfile)):
     print('Started reading {}'.format(targetfile))
@@ -75,13 +93,24 @@ if (not os.path.exists(mtlfile)) or (not os.path.exists(starfile)):
         ii = (targetdata['RA']>10) &  (targetdata['RA']<40) & (targetdata['DEC']<15) & (targetdata['DEC']>-15)
         targetdata = targetdata[ii]
     print('Done reading target data to comput mtl + star')
-
+    
 #compute MTL
 if not os.path.exists(mtlfile):
-    print('computing mtl')
+    print('computing mtl for targets')
     import desitarget.mtl
-    mtl = desitarget.mtl.make_mtl(targetdata)
-
+    tmp_mtl = desitarget.mtl.make_mtl(targetdata)
+    
+    # compute MTL properties for bad sky locations
+    print('computing mtl for bad sky locations')
+    mtl_badsky = desitarget.mtl.make_mtl(badskydata)
+    mtl_badsky['NUMOBS_MORE'][:] = 10
+    mtl_badsky['PRIORITY'][:] = 1
+    mtl_badsky['SUBPRIORITY'][:] = np.random.random(len(mtl_badsky))
+    mtl_badsky['OBSCONDITIONS'][:] = obsconditions.DARK | obsconditions.GRAY | obsconditions.BRIGHT
+    
+    print('computing full mtl')
+    mtl = vstack([tmp_mtl, mtl_badsky], join_type='inner')
+    
     # only include BGS and MWS
     isbgsmws = ((mtl['BGS_TARGET']!=0) | (mtl['MWS_TARGET']!=0))
     if program=="bright":
@@ -91,7 +120,6 @@ if not os.path.exists(mtlfile):
 
 
     mtl.meta['EXTNAME'] = 'MTL'
-    # rewrite NUMOBS for BGS targets
     mtl.write(mtlfile)
     
 
@@ -126,7 +154,7 @@ if not os.path.exists(starfile):
     
 # Running fiberassign
 cmd = "fiberassign --mtl {} ".format(mtlfile)
-cmd += " --sky {} ".format(skyfile)
+cmd += " --sky {} ".format(goodskyfile)
 cmd += " --stdstar {} ".format(starfile)
 cmd += " --footprint {} ".format(tilefile)
 cmd += " --gfafile {}".format(gfafile)
