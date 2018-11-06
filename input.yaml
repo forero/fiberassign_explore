@@ -1,17 +1,5 @@
 # mock target configuration file
 targets:
-    ELG: {
-        target_type: ELG,
-        mockfile: '{DESI_ROOT}/mocks/DarkSky/v1.0.1/elg_0_inpt.fits',
-        format: gaussianfield,
-        density: 2400,
-    }
-    LRG: {
-        target_type: LRG,
-        mockfile: '{DESI_ROOT}/mocks/DarkSky/v1.0.1/lrg_0_inpt.fits',
-        format: gaussianfield,
-        density: 480,
-    }
     QSO: {
         target_type: QSO,
         mockfile: '{DESI_ROOT}/mocks/DarkSky/v1.0.1/qso_0_inpt.fits',
