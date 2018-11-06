@@ -1,4 +1,7 @@
 # Reuses some info from Stephen Bailey shared on [desi-data 3401] "running fiber assignment on a real target catalog"
+# 
+# This code uses DR7 data to run fiberassign on it.
+#
 import os
 import subprocess
 from astropy.table import Table, join, vstack
