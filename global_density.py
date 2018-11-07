@@ -5,7 +5,7 @@ import numpy as np
 
 def write_dens(filetype='std'):
     files = {"targets": "/global/cscratch1/sd/forero/testfiber/dark_large/mtl_large.fits", 
-         "sky": "/project/projectdirs/desi/target/catalogs/dr7.1/0.22.0/skies-dr7.1-0.22.0.fits", 
+         "sky": "/global/cscratch1/sd/forero/fiberassign_explore/dark_large/sky_large.fits", 
          "std" : "/global/cscratch1/sd/forero/testfiber/dark_large/std_large.fits"
     }
     outfile = '{}_ndensity.txt'.format(filetype)
