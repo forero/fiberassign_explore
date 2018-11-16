@@ -72,7 +72,7 @@ to dark time and overlap with the DR7.1 footprint.
 This selection returns 36M targets, 1.3M standard stars and
 22M sky locations.
 Furthermore, we restrict our analysis on tiles that have complete imaging
-within $128<$RA$<225$128 and $-7<$dec$<32$.  This selection reduces
+within $128<$RA$<225$ and $-7<$dec$<32$.  This selection reduces
 the total number of tiles to 2510. 
 
 \section{Results}
@@ -84,7 +84,7 @@ the tiles.
 
 These histograms show that all tiles use at least 4996 fibers; 
 on average $99.98\%$ of the fibers are used.
-1817 tiles out of the 2510 ($72\%$) use all 500 fibers.
+1817 tiles out of the 2510 ($72\%$) use all 5000 fibers.
 All tiles have at least 400 SKY locations and all tiles have 100 STD
 fibers, except one with 99 STD fibers. 
 
@@ -99,11 +99,10 @@ tile per second.
 \begin{figure}[!h]
 \begin{center}
 \begin{center}
-\includegraphics[scale=0.40]{used_fibers.pdf}
+\includegraphics[scale=0.6]{used_fibers.pdf}
 \end{center}
 \caption{
-Histograms with the number of total assigned fibers, SKY fibers, 
-BADSKY fibers and STD fibers.
+Histograms for the numbers of used fibers per tile. There are six different sets: all used fibers, SCIENCE fibers, all fibers without BADSKY, SKY fibers, BADSKY fibers and STD fibers. 
 \label{fig:used_fibers}}
 \end{center}
 \end{figure}
