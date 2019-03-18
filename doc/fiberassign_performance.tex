@@ -77,7 +77,16 @@ the total number of tiles to 2510.
 
 \section{Results}
 
-Figure \ref{fig:used_fibers} summarizes the results, it shows the
+Figure \ref{fig:used_fibers_wedge} summarizes the results, it shows the
+histograms of the number of used SKY and STD fibers per wedge for all tiles.
+The label shows the average and the standard deviation computed over
+the tiles. 
+
+These histograms show that all wedges in all tiles use at least 40 SKY
+fibers and at 10 STD fibers.  
+There is only one wedge in one tile that uses 9 STD fibers.
+
+Figure \ref{fig:used_fibers}  shows the
 histograms of the number of used fibers per tile.
 The label shows the average and the standard deviation computed over
 the tiles. 
@@ -88,6 +97,8 @@ on average $99.98\%$ of the fibers are used.
 All tiles have at least 400 SKY locations and all tiles have 100 STD
 fibers, except one with 99 STD fibers. 
 
+
+
 \section{Performance}
 Runnig fiberassign on a cori login node takes 2 hours and  uses a
 peak of 38GB of RAM.
@@ -95,6 +106,16 @@ The wallclock time is proportional to the number
 of tiles. In this case we have that the code assigns on average one
 tile per second. 
 
+\begin{figure}[!h]
+\begin{center}
+\begin{center}
+\includegraphics[scale=0.4]{used_fibers_per_wedge.pdf}
+\end{center}
+\caption{
+Histograms for the numbers of used SKY and STD fibers per wedge. 
+\label{fig:used_fibers}}
+\end{center}
+\end{figure}
 
 \begin{figure}[!h]
 \begin{center}
