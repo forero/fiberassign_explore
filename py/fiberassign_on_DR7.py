@@ -37,6 +37,7 @@ paths = {"targets": "/project/projectdirs/desi/target/catalogs/dr7.1/0.27.0/",
 
 names = {"targets": "dr7.1-0.27.0.fits", "skies":"dr7.1-0.27.0.fits", "gfas": "dr7.1-0.27.0.fits"}
 
+mtlfile = os.path.join(datadir, 'mtl_{}'.format(names["targets"]))
 starfile = os.path.join(datadir, 'std_{}.fits'.format(program))
 goodskyfile = os.path.join(datadir, 'sky_{}.fits'.format(program))
 tilefile = os.path.join(datadir, "input_tiles_{}.fits".format(program))
@@ -58,8 +59,23 @@ if not os.path.exists(tilefile):
 
     print("wrote tiles to {}".format(tilefile))
 
+#compute MTL
+if not os.path.exists(mtlfile):
+    print('computing mtl for targets')
+    import desitarget.mtl
+    targetdata = fitsio.read(targetfile, 'TARGETS')
+    tmp_mtl = desitarget.mtl.make_mtl(targetdata)
+    tmp_mtl.meta['EXTNAME'] = 'MTL'
+    tmp_mtl.write(mtlfile)
+
+    #print some stats
+    print('MWS_TARGETS: {}'.format(np.count_nonzero(tmp_mtl['MWS_TARGET']!=0)))
+    print('BGS_TARGETS: {}'.format(np.count_nonzero(tmp_mtl['BGS_TARGET']!=0)))
+    print('DESI_TARGETS: {}'.format(np.count_nonzero(tmp_mtl['DESI_TARGET']!=0)))
+    print('finished computing mtl')
+    
 # Running fiberassign
-cmd = "fba_run --targets {} ".format(targetfile)
+cmd = "fba_run --targets {} ".format(mtlfile)
 cmd += " {} ".format(skyfile)
 cmd += " --footprint {} ".format(tilefile)
 cmd += " --dir {} ".format(fiberdir)
@@ -70,7 +86,7 @@ print('finished fiberassign')
 
 
 # merge result
-cmd = "fba_merge_results --targets {} ".format(targetfile)
+cmd = "fba_merge_results --targets {} ".format(mtlfile)
 cmd += " {} ".format(skyfile)   
 cmd += " --out {}".format(fiberdir)
 cmd += " --dir {}".format(fiberdir)
